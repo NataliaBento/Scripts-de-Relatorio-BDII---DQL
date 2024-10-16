@@ -1,0 +1,187 @@
+-- RELATÓRIO 01
+SELECT 
+	E.Nome, 
+	E.CPF, 
+	E.DataAdm, 
+	E.Salario, 
+	D.nome, 
+	T.NUMERO
+FROM EMPREGADO E
+INNER JOIN DEPARTAMENTO D ON E.DEPARTAMENTO_IDDEPARTAMENTO = D.IDDEPARTAMENTO
+LEFT JOIN TELEFONE T ON T.EMPREGADO_CPF = E.CPF
+WHERE
+	DATAADM between '2023-02-15' AND '2023-05-05'
+ORDER BY E.DATAADM DESC
+
+###################################################################################################
+
+
+--RELATÓRIO 02
+SELECT 
+	E.Nome, 
+	E.CPF, 
+	E.DataAdm, 
+	E.Salario, 
+	D.nome AS Departamento, 
+	T.NUMERO
+FROM EMPREGADO E
+INNER JOIN DEPARTAMENTO D ON E.DEPARTAMENTO_IDDEPARTAMENTO = D.IDDEPARTAMENTO
+LEFT JOIN TELEFONE T ON T.EMPREGADO_CPF = E.CPF
+where e.salario < (select avg(salario) from empregado)
+ORDER BY E.NOME
+ 
+    
+###################################################################################################
+
+-- RELATÓRIO 03
+
+SELECT 
+	D.NOME, 
+	COUNT(*) AS QTD_EMPREGADO, 
+	AVG(E.SALARIO) AS MEDIA_SALARIO, 
+	AVG(E.COMISSAO) AS MEDIA_COMISSAO
+FROM DEPARTAMENTO D
+LEFT JOIN EMPREGADO E ON E.DEPARTAMENTO_IDDEPARTAMENTO = D.IDDEPARTAMENTO
+GROUP BY D.NOME
+order by D.NOME
+
+###################################################################################################
+
+-- RELATÓRIO 04
+
+SELECT 
+	E.NOME, 
+    E.CPF, 
+    E.SEXO, 
+    E.SALARIO, 
+    count(*) AS TOTAL_VENDAS, 
+    SUM(V.VALOR) AS VALOR_VENDAS, 
+    SUM(V.COMISSAO) AS VALOR_COMISSAO
+FROM VENDA V 
+inner JOIN EMPREGADO E ON V.EMPREGADO_CPF = E.CPF
+GROUP BY E.NOME, E.CPF, E.SEXO, E.SALARIO
+ORDER BY TOTAL_VENDAS
+
+###################################################################################################
+
+
+-- RELATÓRIO 05
+
+SELECT 
+    E.Nome, 
+    E.CPF, 
+    E.Sexo, 
+    E.Salario, 
+    COUNT(I.Venda_idVenda) AS TotalVendas, 
+    SUM(I.Valor) AS TotalValorVendidoComServico,
+    sum(v.comissao) as TotalComissaoVendaComServico
+FROM 
+    Empregado E 
+    INNER JOIN itensServico I ON E.CPF = I.Empregado_CPF
+    inner join venda v on v.idvenda = i.venda_idvenda
+GROUP BY 
+    E.Nome, 
+    E.CPF, 
+    E.Sexo, 
+    E.Salario 
+ORDER BY 
+    TotalVendas
+	
+###################################################################################################
+
+-- RELATÓRIO 06
+	
+SELECT 
+    P.Nome AS NomePet,
+    S.Nome AS NomeServico,
+    I.Quantidade,
+    I.Valor,
+    E.Nome AS EmpregadoQueRealizouServico
+    
+FROM 
+    itensServico I
+    INNER JOIN Pet P ON I.Pet_IDPet = P.IDPet
+    INNER JOIN Servico S ON I.Servico_IDServico = S.IDServico
+    INNER JOIN Empregado E ON I.Empregado_CPF = E.CPF
+	INNER JOIN VENDA V ON V.idVenda = I.Venda_idVenda
+    
+order by V.data desc
+
+
+###################################################################################################
+
+-- RELATÓRIO 07
+
+select
+	V.data,
+	V.valor,
+	V.desconto,
+    (v.valor - v.desconto) as valorFinal, -- é isso msm?
+    e.nome as nomeFuncionario
+from 
+	venda V
+inner join empregado E on v.Empregado_cpf = e.cpf
+order by v.data desc
+
+
+###################################################################################################
+
+-- RELATÓRIO 08
+
+
+select s.nome, i.quantidade, sum(i.valor) as totalValorVendido
+from itensservico i
+inner join servico s on s.idServico = i.Servico_idServico
+group by s.nome, i.quantidade
+limit 10
+
+
+###################################################################################################
+
+-- RELATÓRIO 09
+
+
+select f.tipo, count(*) as qtd_vendas, sum(f.valorpago) 
+from formapgvenda f
+inner join venda v on f.Venda_idVenda = v.idVenda -- não faz sentindo este join, pois ele não é usado nesta consulta
+group by f.tipo
+order by qtd_vendas;
+
+###################################################################################################
+
+-- RELATÓRIO 10
+
+select date(data) as soData, count(*) as totalVendas, sum(v.valor) as valorTotalVendas
+from venda v
+left join itensservico s on v.idVenda = s.Venda_idVenda
+left join itensvendaprod p on v.idVenda = p.Venda_idVenda
+group by soData
+order by soData
+
+###################################################################################################
+
+-- RELATÓRIO 11
+
+select 
+	p.nome as nomeProduto, 
+    p.valorVenda as valorProduto, 
+    f.nome as nomeFornecedor, 
+    f.email as emailFornecedor, 
+    t.numero as telefoneFornecedor
+from itenscompra i
+inner join produtos p on i.Produtos_idProduto = p.idproduto
+inner join compras c on c.idCompra = i.Compras_idCompra
+inner join fornecedor f on f.cpf_cnpj = c.Fornecedor_cpf_cnpj
+left join telefone t on t.Fornecedor_cpf_cnpj = f.cpf_cnpj
+order by p.nome
+
+
+###################################################################################################
+
+-- RELATÓRIO 12
+
+select p.nome, count(*) as qtdVendas, sum(i.valor)
+from itensvendaprod i
+inner join produtos p on p.idProduto = i.Produto_idProduto
+group by p.nome
+order by qtdVendas;
