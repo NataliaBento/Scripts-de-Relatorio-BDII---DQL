@@ -1,3 +1,4 @@
+
 -- RELATÓRIO 01
 SELECT 
 	E.Nome, 
@@ -55,7 +56,7 @@ SELECT
     E.SEXO, 
     E.SALARIO, 
     count(*) AS TOTAL_VENDAS, 
-    SUM(V.VALOR) AS VALOR_VENDAS, 
+    SUM(V.VALOR - V.desconto) AS VALOR_VENDAS, 
     SUM(V.COMISSAO) AS VALOR_COMISSAO
 FROM VENDA V 
 inner JOIN EMPREGADO E ON V.EMPREGADO_CPF = E.CPF
@@ -73,8 +74,8 @@ SELECT
     E.Sexo, 
     E.Salario, 
     COUNT(I.Venda_idVenda) AS TotalVendas, 
-    SUM(I.Valor) AS TotalValorVendidoComServico,
-    sum(v.comissao) as TotalComissaoVendaComServico
+    SUM(i.quantidade*(i.valor-i.desconto)) AS TotalValorVendidoComServico,
+    sum(v.comissao) as TotalComissaoVendaComServico -- comissão do empregado ou da venda?
 FROM 
     Empregado E 
     INNER JOIN itensServico I ON E.CPF = I.Empregado_CPF
@@ -129,7 +130,7 @@ order by v.data desc
 -- RELATÓRIO 08
 
 
-select s.nome, i.quantidade, sum(i.valor) as totalValorVendido
+select s.nome, sum(i.quantidade), sum(i.quantidade*(i.valor-i.desconto)) as totalValorVendido
 from itensservico i
 inner join servico s on s.idServico = i.Servico_idServico
 group by s.nome, i.quantidade
@@ -180,8 +181,9 @@ order by p.nome
 
 -- RELATÓRIO 12
 
-select p.nome, count(*) as qtdVendas, sum(i.valor)
+select p.nome, count(*) as qtdVendas, sum(i.quantidade*(i.valor-i.desconto)) as valorRecebido
 from itensvendaprod i
 inner join produtos p on p.idProduto = i.Produto_idProduto
 group by p.nome
 order by qtdVendas;
+
